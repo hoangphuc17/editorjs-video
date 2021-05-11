@@ -1,0 +1,224 @@
+<!--
+ Use this page for debugging purposes.
+
+ Editor Tools are loaded as git-submodules.
+ You can pull modules by running `yarn pull_tools` and start experimenting.
+ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Editor.js</title>
+  <link href="https://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet">
+  <link href="assets/demo.css" rel="stylesheet">
+  <script src="assets/json-preview.js"></script>
+  <script src="assets/data.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+  <div class="ce-example">
+    <div class="ce-example__header">
+      <a class="ce-example__header-logo" href="https://codex.so/editor">Editor.js 🤩🧦🤨</a>
+
+      <div class="ce-example__header-menu">
+        <a href="https://github.com/editor-js" target="_blank">Plugins</a>
+        <a href="https://editorjs.io/usage" target="_blank">Usage</a>
+        <a href="https://editorjs.io/configuration" target="_blank">Configuration</a>
+        <a href="https://editorjs.io/creating-a-block-tool" target="_blank">API</a>
+      </div>
+    </div>
+    <div class="ce-example__content _ce-example__content--small">
+      <div id="editorjs"></div>
+      <div id="hint" style="text-align: center;">
+        No submodules found. Run <code class="inline-code">yarn pull_tools</code>
+      </div>
+      <div class="ce-example__button" id="saveButton">
+        editor.save()
+      </div>
+      <div class="ce-example__statusbar">
+        Readonly:
+        <b id="readonly-state">
+          Off
+        </b>
+        <div class="ce-example__statusbar-button" id="toggleReadOnlyButton">
+          toggle
+        </div>
+      </div>
+    </div>
+    <div class="ce-example__output">
+      <pre class="ce-example__output-content" id="output"></pre>
+
+      <div class="ce-example__output-footer">
+        <a href="https://codex.so" style="font-weight: bold;">Made by CodeX</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Tools -->
+  <!--
+   You can upload Tools to your project's directory and use as in example below.
+
+   Also you can load each Tool from CDN or use NPM/Yarn packages.
+
+   Read more in Tool's README file. For example:
+   https://github.com/editor-js/header#installation
+   -->
+  <script src="./dist/bundle.js" onload="document.getElementById('hint').hidden = true"></script><!-- Header -->
+
+  <!-- Load Editor.js's Core -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+
+  <!-- Initialization -->
+  <script>
+    const _uploadByFile = (file) => {
+      const formData = new FormData();
+      formData.append('files', file);
+
+      const response = fetch("http:localhost:1337/upload", {
+        method: 'POST', 
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmZDMxMGMwNDEwMTc2MDAxMGVkMDgxZSIsImlhdCI6MTYwOTg5OTMxNiwiZXhwIjoxNjEyNDkxMzE2fQ.rH4JnvO_b44wp7w75IniL7LiLCo5aJ76pZKPv-81ugs',
+          // 'Content-Type': "multipart/form-data; boundary=----WebKitFormBoundaryDQmilwlLH1ZMLndM"
+        },
+        body: formData
+      });
+
+      return response
+      .then(response => response.json())
+      .then(result => {
+          const uploaded = result[0];
+
+          return {
+            success: 1,
+            file: {
+              url: uploaded.url,
+              id: uploaded.id,
+              width: uploaded.width,
+              height: uploaded.height,
+              formats: uploaded.formats
+            }
+          };
+        });
+    }
+
+    const selectMedia = () => {
+      const media = {
+        "url": "https://media.viezone.vn/prod/2021/1/4/a1_15885905332721597800481_611b6e6316.jpg",
+        "id": "5ff368fadcb699001044416e",
+        "width": 852,
+        "height": 476,
+        "formats": {
+          "thumbnail": {},
+          "medium": {},
+          "small": {}
+        }
+      }
+      return {
+        success: 1,
+        file: {
+          url: media.url,
+          id: media.id,
+          width: media.width,
+          height: media.height,
+          formats: media.formats
+        },
+      };
+    }
+
+    /**
+     * To initialize the Editor, create a new instance with configuration object
+     * @see docs/installation.md for mode details
+     */
+    var editor = new EditorJS({
+      /**
+       * Enable/Disable the read only mode
+       */
+      readOnly: false,
+
+      /**
+       * Wrapper of Editor
+       */
+      holder: 'editorjs',
+
+      /**
+       * Common Inline Toolbar settings
+       * - if true (or not specified), the order from 'tool' property will be used
+       * - if an array of tool names, this order will be used
+       */
+      // inlineToolbar: ['link', 'marker', 'bold', 'italic'],
+      // inlineToolbar: true,
+
+      /**
+       * Tools list
+       */
+      tools: {
+        /**
+         * Each Tool is a Plugin. Pass them via 'class' option with necessary settings {@link docs/tools.md}
+         */        
+        video: {
+          class: VideoTool,
+          config: {
+            uploader: {
+              uploadByFile: _uploadByFile
+            },
+            types: 'video/mp4'
+          }
+        },        
+
+      },
+
+      /**
+       * This Tool will be used as default
+       */
+      // defaultBlock: 'paragraph',
+
+      /**
+       * Initial Editor data
+       */
+      data: getData([
+        'video',
+      ]),
+      
+      onReady: function(){
+        saveButton.click();
+      },
+      onChange: function() {
+        console.log('something changed');
+      },
+    });
+
+    /**
+     * Saving button
+     */
+    const saveButton = document.getElementById('saveButton');
+
+    /**
+     * Toggle read-only button
+     */
+    const toggleReadOnlyButton = document.getElementById('toggleReadOnlyButton');
+    const readOnlyIndicator = document.getElementById('readonly-state');
+
+    /**
+     * Saving example
+     */
+    saveButton.addEventListener('click', function () {
+      editor.save()
+        .then((savedData) => {
+          cPreview.show(savedData, document.getElementById("output"));
+        })
+        .catch((error) => {
+          console.error('Saving error', error);
+        });
+    });
+
+    /**
+     * Toggle read-only example
+     */
+    toggleReadOnlyButton.addEventListener('click', async () => {
+      const readOnlyState = await editor.readOnly.toggle();
+
+      readOnlyIndicator.textContent = readOnlyState ? 'On' : 'Off';
+    });
+  </script>
+</body>
+</html>

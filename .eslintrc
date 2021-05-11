@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "codex"
+  ],
+  "globals": {
+    "fetch": true,
+    "VideoConfig": true,
+    "VideoToolData": true
+  }
+}
