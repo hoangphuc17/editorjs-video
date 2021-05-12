@@ -1,4 +1,5 @@
-import buttonIcon from './svg/button-icon.svg';
+import buttonIcon from "./svg/button-icon.svg";
+import SERVICES from "./services";
 
 /**
  * Class for working with UI:
@@ -20,12 +21,12 @@ export default class Ui {
     this.onSelectFile = onSelectFile;
     this.readOnly = readOnly;
     this.nodes = {
-      wrapper: make('div', [this.CSS.baseClass, this.CSS.wrapper]),
-      videoContainer: make('div', [ this.CSS.videoContainer ]),
+      wrapper: make("div", [this.CSS.baseClass, this.CSS.wrapper]),
+      videoContainer: make("div", [this.CSS.videoContainer]),
       fileButton: this.createFileButton(),
       videoEl: undefined,
-      videoPreloader: make('div', this.CSS.videoPreloader),
-      caption: make('div', [this.CSS.input, this.CSS.caption], {
+      videoPreloader: make("div", this.CSS.videoPreloader),
+      caption: make("div", [this.CSS.input, this.CSS.caption], {
         contentEditable: !this.readOnly,
       }),
     };
@@ -62,13 +63,13 @@ export default class Ui {
       /**
        * Tool's classes
        */
-      wrapper: 'video-tool',
-      videoContainer: 'video-tool__video',
-      videoPreloader: 'video-tool__video-preloader',
-      videoEl: 'video-tool__video-picture',
-      caption: 'video-tool__caption',
+      wrapper: "video-tool",
+      videoContainer: "video-tool__video",
+      videoPreloader: "video-tool__video-preloader",
+      videoEl: "video-tool__video-picture",
+      caption: "video-tool__caption",
     };
-  };
+  }
 
   /**
    * Ui statuses:
@@ -80,9 +81,9 @@ export default class Ui {
    */
   static get status() {
     return {
-      EMPTY: 'empty',
-      UPLOADING: 'loading',
-      FILLED: 'filled',
+      EMPTY: "empty",
+      UPLOADING: "loading",
+      FILLED: "filled",
     };
   }
 
@@ -108,11 +109,13 @@ export default class Ui {
    * @returns {Element}
    */
   createFileButton() {
-    const button = make('div', [ this.CSS.button ]);
+    const button = make("div", [this.CSS.button]);
 
-    button.innerHTML = this.config.buttonContent || `${buttonIcon} ${this.api.i18n.t('Select an Video')}`;
+    button.innerHTML =
+      this.config.buttonContent ||
+      `${buttonIcon} ${this.api.i18n.t("Select an Video")}`;
 
-    button.addEventListener('click', () => {
+    button.addEventListener("click", () => {
       this.onSelectFile();
     });
 
@@ -137,7 +140,7 @@ export default class Ui {
    * @returns {void}
    */
   hidePreloader() {
-    this.nodes.videoPreloader.style.backgroundVideo = '';
+    this.nodes.videoPreloader.style.backgroundVideo = "";
     this.toggleStatus(Ui.status.EMPTY);
   }
 
@@ -147,54 +150,75 @@ export default class Ui {
    * @param {string} url - video source
    * @returns {void}
    */
-  fillVideo(url) {
-    /**
-     * Check for a source extension to compose element correctly: video tag for mp4, img — for others
-     */
-    const tag = /\.mp4$/.test(url.toLowerCase()) ? 'VIDEO' : 'IMG';
+  fillVideo({ url, service }) {
+    let eventName = "load";
 
-    const attributes = {
-      src: url,
-    };
+    if (service) {
+      const {
+        regex,
+        embedUrl,
+        width,
+        height,
+        id = (ids) => ids.shift(),
+      } = SERVICES[service];
+      const result = regex.exec(url).slice(1);
+      const embed = embedUrl.replace(/<%= remote_id %>/g, id(result));
+      const tag = "iframe";
+      const attributes = {
+        src: embed,
+        width,
+        height,
+      };
 
-    /**
-     * We use eventName variable because IMG and VIDEO tags have different event to be called on source load
-     * - IMG: load
-     * - VIDEO: loadeddata
-     *
-     * @type {string}
-     */
-    let eventName = 'load';
-
-    /**
-     * Update attributes and eventName if source is a mp4 video
-     */
-    if (tag === 'VIDEO') {
+      this.nodes.videoEl = make(tag, this.CSS.videoEl, attributes);
+    } else {
       /**
-       * Add attributes for playing muted mp4 as a gif
-       *
-       * @type {boolean}
+       * Check for a source extension to compose element correctly: video tag for mp4, img — for others
        */
-      attributes.autoplay = false;
-      attributes.loop = false;
-      attributes.muted = true;
-      attributes.playsinline = true;
-      attributes.controls = true;
+      const tag = /\.mp4$/.test(url.toLowerCase()) ? "VIDEO" : "IMG";
+
+      const attributes = {
+        src: url,
+      };
 
       /**
-       * Change event to be listened
+       * We use eventName variable because IMG and VIDEO tags have different event to be called on source load
+       * - IMG: load
+       * - VIDEO: loadeddata
        *
        * @type {string}
        */
-      eventName = 'loadeddata';
-    }
 
-    /**
-     * Compose tag with defined attributes
-     *
-     * @type {Element}
-     */
-    this.nodes.videoEl = make(tag, this.CSS.videoEl, attributes);
+      /**
+       * Update attributes and eventName if source is a mp4 video
+       */
+      if (tag === "VIDEO") {
+        /**
+         * Add attributes for playing muted mp4 as a gif
+         *
+         * @type {boolean}
+         */
+        attributes.autoplay = false;
+        attributes.loop = false;
+        attributes.muted = true;
+        attributes.playsinline = true;
+        attributes.controls = true;
+
+        /**
+         * Change event to be listened
+         *
+         * @type {string}
+         */
+        eventName = "loadeddata";
+      }
+
+      /**
+       * Compose tag with defined attributes
+       *
+       * @type {Element}
+       */
+      this.nodes.videoEl = make(tag, this.CSS.videoEl, attributes);
+    }
 
     /**
      * Add load event listener
@@ -206,11 +230,20 @@ export default class Ui {
        * Preloader does not exists on first rendering with presaved data
        */
       if (this.nodes.videoPreloader) {
-        this.nodes.videoPreloader.style.backgroundVideo = '';
+        this.nodes.videoPreloader.style.backgroundVideo = "";
       }
     });
 
-    this.nodes.videoContainer.appendChild(this.nodes.videoEl);
+    let videoNode = this.nodes.videoEl;
+
+    if (service) {
+      const iframeWrapper = make("div", "ratio-16-9", {});
+
+      iframeWrapper.appendChild(videoNode);
+      videoNode = iframeWrapper;
+    }
+
+    this.nodes.videoContainer.appendChild(videoNode);
   }
 
   /**
@@ -234,9 +267,9 @@ export default class Ui {
   fillPoster(url) {
     if (this.nodes.videoEl) {
       if (url) {
-        this.nodes.videoEl.setAttribute('poster', url);
+        this.nodes.videoEl.setAttribute("poster", url);
       } else {
-        this.nodes.videoEl.removeAttribute('poster');
+        this.nodes.videoEl.removeAttribute("poster");
       }
     }
   }
@@ -250,7 +283,10 @@ export default class Ui {
   toggleStatus(status) {
     for (const statusType in Ui.status) {
       if (Object.prototype.hasOwnProperty.call(Ui.status, statusType)) {
-        this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${Ui.status[statusType]}`, status === Ui.status[statusType]);
+        this.nodes.wrapper.classList.toggle(
+          `${this.CSS.wrapper}--${Ui.status[statusType]}`,
+          status === Ui.status[statusType]
+        );
       }
     }
   }
@@ -263,9 +299,12 @@ export default class Ui {
    * @returns {void}
    */
   applyTune(tuneName, status) {
-    this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${tuneName}`, status);
+    this.nodes.wrapper.classList.toggle(
+      `${this.CSS.wrapper}--${tuneName}`,
+      status
+    );
 
-    if (tuneName === 'withPoster') {
+    if (tuneName === "withPoster") {
       this.fillPoster(status);
     }
   }

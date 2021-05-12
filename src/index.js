@@ -346,7 +346,10 @@ export default class VideoTool {
     this._data.file = file || {};
 
     if (file && file.url) {
-      this.ui.fillVideo(file.url);
+      this.ui.fillVideo({
+        url: file.url,
+        ...(file.service && { service: file.service }),
+      });
     }
   }
 
