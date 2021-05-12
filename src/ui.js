@@ -154,6 +154,7 @@ export default class Ui {
    */
   fillVideo({ url, service }) {
     let eventName = "load";
+    console.log(service);
 
     if (service) {
       const {

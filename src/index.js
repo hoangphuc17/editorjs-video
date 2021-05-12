@@ -302,6 +302,10 @@ export default class VideoTool {
    * @param {VideoToolData} data - data in Video Tool format
    */
   set data(data) {
+    if (data.service) {
+      this._data.service = data.service;
+    }
+
     if (data.file) {
       this.video = data.file;
     }
@@ -348,7 +352,7 @@ export default class VideoTool {
     if (file && file.url) {
       this.ui.fillVideo({
         url: file.url,
-        ...(file.service && { service: file.service }),
+        service: this._data.service,
       });
     }
   }

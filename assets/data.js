@@ -46,8 +46,8 @@ const DATA = {
       data: {
         file: {
           url: 'https://www.youtube.com/watch?v=hgFXU10bhH0',
-          service: 'youtube',
         },
+        service: 'youtube',
         caption:
           'Khoảnh khắc MC Trấn Thành hỏi Minh Tú về chuyện yêu Andree trên sóng truyền hình',
         withBorder: false,
