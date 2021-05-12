@@ -1,6 +1,6 @@
 {
   "name": "@sony172/editorjs-video",
-  "version": "2.6.1",
+  "version": "1.0.1",
   "keywords": [
     "codex editor",
     "tool",
@@ -10,7 +10,10 @@
   ],
   "description": "Video Tool for Editor.js",
   "license": "MIT",
-  "repository": "https://github.com/hoangphuc17/editorjs-video",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoangphuc17/editorjs-video.git"
+  },
   "main": "./dist/bundle.js",
   "scripts": {
     "build": "webpack --mode production",
@@ -19,10 +22,7 @@
     "lint:errors": "eslint src/ --ext .js --quiet",
     "lint:fix": "eslint src/ --ext .js --fix"
   },
-  "author": {
-    "name": "vietlongn",
-    "email": "vietlongn@outlook.com"
-  },
+  "author": "phuc.nh94 <phuc.nh94@gmail.com>",
   "devDependencies": {
     "@babel/core": "^7.3.4",
     "@babel/plugin-transform-runtime": "^7.2.0",
@@ -43,5 +43,9 @@
     "svg-inline-loader": "^0.8.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/hoangphuc17/editorjs-video/issues"
+  },
+  "homepage": "https://github.com/hoangphuc17/editorjs-video#readme"  
 }

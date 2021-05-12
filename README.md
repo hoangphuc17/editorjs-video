@@ -126,7 +126,7 @@ This Tool returns `data` with following format
 
 | Field          | Type      | Description                     |
 | -------------- | --------- | ------------------------------- |
-| file           | `object`  | Uploaded file data. Any data got from backend uploader. Always contain the `url` property |
+| file           | `object`  | Uploaded file data. Any data got from backend uploader. Always contain the `url` property.  Add `service`: `youtube` if `url` is a youtube link. |
 | caption        | `string`  | video's caption                 |
 | withBorder     | `boolean` | add border to video             |
 | withBackground | `boolean` | need to add background          |
