@@ -68,6 +68,8 @@ export default class Ui {
       videoPreloader: "video-tool__video-preloader",
       videoEl: "video-tool__video-picture",
       caption: "video-tool__caption",
+      iframeWrapper: "video-tool__video-ratio-16-9",
+      iframeVideoEl: "video-tool__video-ratio-16-9-picture",
     };
   }
 
@@ -170,7 +172,7 @@ export default class Ui {
         height,
       };
 
-      this.nodes.videoEl = make(tag, this.CSS.videoEl, attributes);
+      this.nodes.videoEl = make(tag, this.CSS.iframeVideoEl, attributes);
     } else {
       /**
        * Check for a source extension to compose element correctly: video tag for mp4, img — for others
@@ -237,7 +239,7 @@ export default class Ui {
     let videoNode = this.nodes.videoEl;
 
     if (service) {
-      const iframeWrapper = make("div", "ratio-16-9", {});
+      const iframeWrapper = make("div", this.CSS.iframeWrapper, {});
 
       iframeWrapper.appendChild(videoNode);
       videoNode = iframeWrapper;
